@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: ai-voice-assistant
+    env: python
+    plan: free
+    buildCommand: |
+      apt-get update && apt-get install -y espeak ffmpeg libespeak-ng1
+      pip install -r requirements.txt
+    startCommand: gunicorn app:app

@@ -8,6 +8,8 @@ soundfile
 pyttsx3
 SpeechRecognition
 pydub
+torch
+transformers
 werkzeug>=2.0
 # Optional (for offline ASR): vosk
 # vosk
