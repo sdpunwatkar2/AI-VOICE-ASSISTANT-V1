@@ -1,0 +1,13 @@
+
+Flask>=2.0
+numpy
+scipy
+scikit-learn
+joblib
+soundfile
+pyttsx3
+SpeechRecognition
+pydub
+werkzeug>=2.0
+# Optional (for offline ASR): vosk
+# vosk

@@ -1,0 +1,31 @@
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>AI Voice Assistant</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#0f1724; color:#e6eef8; display:flex; align-items:center; justify-content:center; height:100vh; }
+    .card { background:linear-gradient(180deg,#071428,#0b1a2a); padding:24px; border-radius:12px; width:720px; box-shadow: 0 10px 30px rgba(0,0,0,0.6);}
+    button { padding:10px 16px; border-radius:8px; border:none; cursor:pointer; }
+    #record { background:#06b6d4; color:#001219; }
+    #stop { background:#ef4444; color:white; margin-left:8px; }
+    pre { background:#021627; padding:12px; border-radius:8px; max-height:200px; overflow:auto; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>AI Voice Assistant (Web)</h2>
+    <p>Click start recording and speak. This demo uses offline-friendly components where possible.</p>
+    <div>
+      <button id="record">Start Recording</button>
+      <button id="stop" disabled>Stop</button>
+    </div>
+    <h3>Transcript:</h3>
+    <pre id="transcript">—</pre>
+    <h3>Reply:</h3>
+    <pre id="reply">—</pre>
+  </div>
+  <script src="/static/script.js"></script>
+</body>
+</html>

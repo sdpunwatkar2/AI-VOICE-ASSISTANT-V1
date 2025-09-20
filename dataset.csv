@@ -1,0 +1,16 @@
+text,intent
+    hello, greet
+    hi there, greet
+    hey, greet
+    good morning, greet
+    bye, goodbye
+    goodbye, goodbye
+    see you, goodbye
+    what's the time, time
+    tell me the time, time
+    what's today's date, date
+    tell me the date, date
+    how's the weather, weather
+    will it rain today, weather
+    play some music, play_music
+    stop the music, stop_music
