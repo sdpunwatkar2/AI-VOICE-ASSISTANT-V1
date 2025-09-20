@@ -1,4 +1,3 @@
-
 import os
 import tempfile
 import json
@@ -8,7 +7,9 @@ import soundfile as sf
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
-import pyttsx3
+import base64
+import io
+from gtts import gTTS
 
 # Optional VOSK import handled lazily
 try:
@@ -17,14 +18,13 @@ try:
 except Exception:
     VOSK_AVAILABLE = False
 
-MODELS_DIR = Path = os.path.join(os.path.dirname(__file__), 'models')
+MODELS_DIR = os.path.join(os.path.dirname(__file__), 'models')
 INTENT_MODEL_PATH = os.path.join(MODELS_DIR, 'intent_model.joblib')
 VOSK_MODEL_PATH = os.environ.get('VOSK_MODEL_PATH', '')
 
 class Assistant:
     def __init__(self):
         os.makedirs(MODELS_DIR, exist_ok=True)
-        self.tts_engine = pyttsx3.init()
         self.intent_clf = None
         if os.path.exists(INTENT_MODEL_PATH):
             try:
@@ -48,8 +48,6 @@ class Assistant:
         # Transcribe
         text = self.transcribe(temp_path)
         reply = self.get_reply(text)
-        # Speak the reply (non-blocking)
-        self.speak(reply)
         # cleanup
         try:
             os.unlink(temp_path)
@@ -61,9 +59,7 @@ class Assistant:
         # Prefer VOSK offline if available
         if self.vosk_model:
             try:
-                wf = open(wav_path, "rb")
-                rec = KaldiRecognizer(self.vosk_model, 16000)
-                import wave, json
+                import wave
                 wf = wave.open(wav_path, "rb")
                 rec = KaldiRecognizer(self.vosk_model, wf.getframerate())
                 text_chunks = []
@@ -73,13 +69,14 @@ class Assistant:
                         break
                     if rec.AcceptWaveform(data):
                         res = json.loads(rec.Result())
-                        text_chunks.append(res.get('text',''))
+                        text_chunks.append(res.get('text', ''))
                 res = json.loads(rec.FinalResult())
-                text_chunks.append(res.get('text',''))
+                text_chunks.append(res.get('text', ''))
                 return ' '.join([t for t in text_chunks if t])
             except Exception as e:
                 print("VOSK failed:", e)
-        # Fallback: try SpeechRecognition with Google Web Speech API
+
+        # Fallback: Google Web Speech API
         try:
             import speech_recognition as sr
             r = sr.Recognizer()
@@ -101,6 +98,7 @@ class Assistant:
                 intent = None
         else:
             intent = None
+
         # Rules-based fallback
         text_low = text.lower()
         if 'time' in text_low:
@@ -114,13 +112,19 @@ class Assistant:
         if intent == 'goodbye':
             return "Goodbye! Have a great day."
         if intent == 'weather':
-            return "I can't fetch live weather in this offline demo, but you can integrate a weather API."
+            return "I can't fetch live weather in this demo, but you can integrate a weather API."
         # Default echo
         return "You said: " + text
 
-    def speak(self, text):
+    def synthesize_speech(self, text):
+        """Convert reply text to base64 MP3 for web playback"""
         try:
-            self.tts_engine.say(text)
-            self.tts_engine.runAndWait()
+            tts = gTTS(text=text, lang="en")
+            mp3_io = io.BytesIO()
+            tts.write_to_fp(mp3_io)
+            mp3_io.seek(0)
+            audio_b64 = base64.b64encode(mp3_io.read()).decode("utf-8")
+            return "data:audio/mp3;base64," + audio_b64
         except Exception as e:
             print("TTS failed:", e)
+            return ""

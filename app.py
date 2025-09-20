@@ -1,8 +1,6 @@
-
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify
 import os
 from assistant import Assistant
-from pathlib import Path
 import base64
 import io
 import soundfile as sf
@@ -21,6 +19,7 @@ def process_audio():
     if not audio_b64:
         return jsonify({'error': 'no audio provided'}), 400
 
+    # Remove data URL header if present
     header, b64data = audio_b64.split(',', 1) if ',' in audio_b64 else (None, audio_b64)
     audio_bytes = base64.b64decode(b64data)
     audio_file = io.BytesIO(audio_bytes)
@@ -30,15 +29,16 @@ def process_audio():
     except Exception as e:
         return jsonify({'error': f'could not read audio: {e}'}), 400
 
+    # Run assistant (speech-to-text + reply)
     text, reply = assistant.handle_audio_array(audio, samplerate)
 
-    # Generate TTS audio
+    # Generate TTS (base64 MP3 string)
     reply_audio = assistant.synthesize_speech(reply)
 
     return jsonify({
         'transcript': text,
         'reply': reply,
-        'audio': reply_audio  # base64 WAV
+        'audio': reply_audio  # base64 MP3
     })
 
 if __name__ == '__main__':
