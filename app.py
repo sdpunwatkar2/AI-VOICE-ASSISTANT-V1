@@ -15,6 +15,8 @@ def index():
 @app.route('/process', methods=['POST'])
 def process_audio():
     data = request.json
+    if not data or 'audio' not in data:
+        return jsonify({'error': 'no audio provided'}), 400
     audio_b64 = data.get('audio')
     if not audio_b64:
         return jsonify({'error': 'no audio provided'}), 400

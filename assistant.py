@@ -36,6 +36,7 @@ class Assistant:
         self.vosk_model = None
         if VOSK_AVAILABLE and VOSK_MODEL_PATH and os.path.exists(VOSK_MODEL_PATH):
             try:
+                from vosk import Model
                 self.vosk_model = Model(VOSK_MODEL_PATH)
             except Exception:
                 self.vosk_model = None
@@ -60,6 +61,7 @@ class Assistant:
         if self.vosk_model:
             try:
                 import wave
+                from vosk import KaldiRecognizer
                 wf = wave.open(wav_path, "rb")
                 rec = KaldiRecognizer(self.vosk_model, wf.getframerate())
                 text_chunks = []
@@ -82,7 +84,11 @@ class Assistant:
             r = sr.Recognizer()
             with sr.AudioFile(wav_path) as source:
                 audio = r.record(source)
-            return r.recognize_google(audio)
+            # Use recognize_google method from Recognizer class
+            return r.recognize_google(audio)  # type: ignore
+        except AttributeError:
+            print("speech_recognition.Recognizer does not have 'recognize_google'. Please ensure the library is up to date.")
+            return ""
         except Exception as e:
             print("Fallback STT failed:", e)
             return ""
